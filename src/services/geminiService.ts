@@ -939,17 +939,9 @@ Respond with ONLY one of these words: Clarify, Plan, Execute, Verify, Reflect`;
    */
   static async generateSessionTitle(conversationMessages: string[]): Promise<string> {
     try {
-      this.initialize();
-      
-      if (!this.model) {
-        console.log('Gemini model not initialized - API key missing, using fallback title');
-        return this.generateFallbackTitle(conversationMessages);
-      }
-
-      // Take the first few messages to understand the conversation topic
       const recentMessages = conversationMessages.slice(0, 6).join('\n');
-      
-      const titlePrompt = `You are generating a concise, descriptive title for an AI tutoring conversation. 
+
+      const titlePrompt = `You are generating a concise, descriptive title for an AI tutoring conversation.
 
 CONVERSATION CONTEXT:
 ${recentMessages}
@@ -970,20 +962,28 @@ Examples of good titles:
 
 Respond with ONLY the title, no quotes or additional text.`;
 
-      const result = await this.model.generateContent(titlePrompt);
-      const response = await result.response;
-      const title = response.text().trim();
-      
-      // Clean up the title (remove quotes if present)
-      const cleanTitle = title.replace(/^["']|["']$/g, '').trim();
-      
-      if (cleanTitle.length > 0 && cleanTitle.length <= 50) {
+      const title = (
+        await ZenMuxService.generateContent(
+          ZenMuxService.MODELS.GEMINI_2_5_FLASH,
+          titlePrompt,
+          'Respond with ONLY the title, no quotes or additional text.',
+          { max_tokens: 32, temperature: 0.3 }
+        )
+      ).trim();
+
+      const cleanTitle = title.replace(/^["']|["']$/g, '').replace(/\s+/g, ' ').trim();
+      const looksLikeFallback =
+        cleanTitle.startsWith("I'm here to help") ||
+        cleanTitle.startsWith('# Generated') ||
+        cleanTitle.includes('\n');
+
+      if (cleanTitle.length > 0 && cleanTitle.length <= 50 && !looksLikeFallback) {
         console.log(`[Title Generation] Generated title: "${cleanTitle}"`);
         return cleanTitle;
-      } else {
-        console.warn(`[Title Generation] Invalid title generated: "${cleanTitle}", using fallback`);
-        return this.generateFallbackTitle(conversationMessages);
       }
+
+      console.warn(`[Title Generation] Invalid title generated, using fallback`);
+      return this.generateFallbackTitle(conversationMessages);
     } catch (error) {
       console.error('Error generating session title:', error);
       return this.generateFallbackTitle(conversationMessages);
