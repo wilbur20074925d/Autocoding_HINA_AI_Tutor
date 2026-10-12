@@ -132,26 +132,9 @@ interface AITestChatboxProps {
   isActive?: boolean;
 }
 
-const JOURNEY_STAGES = [
-  { id: 'Orient', name: 'Orient', blurb: 'Set the goal and recall what you already know.', icon: Compass },
-  { id: 'Clarify', name: 'Clarify', blurb: 'Name the problem and the gaps in your understanding.', icon: Eye },
-  { id: 'Strategize', name: 'Strategize', blurb: 'Choose how you will work through it.', icon: Target },
-  { id: 'Execute', name: 'Execute', blurb: 'Build the answer, step by step.', icon: Hammer },
-  { id: 'Monitor', name: 'Monitor', blurb: 'Check progress and switch tactics if you stall.', icon: RefreshCw },
-  { id: 'Verify', name: 'Verify', blurb: 'Justify the result with evidence.', icon: CheckCircle2 },
-  { id: 'Reflect', name: 'Reflect', blurb: 'Carry what you learned into the next task.', icon: ArrowRight },
-] as const;
-
-const normalizeJourneyStage = (stage?: string) => {
-  if (stage === 'Plan') return 'Strategize';
-  return JOURNEY_STAGES.some((item) => item.id === stage) ? stage : 'Clarify';
-};
-
 const INSIGHT_PAGES = [
   { id: 'strategy', title: 'Strategy', icon: Brain },
-  { id: 'journey', title: 'Journey', icon: Compass },
   { id: 'shape', title: 'Shape', icon: ScatterChart },
-  { id: 'workflow', title: 'Workflow', icon: Activity },
 ] as const;
 
 const QUAD_TAGS: Array<{ key: HinaDimension; label: string; short: string; angle: number }> = [
@@ -160,71 +143,6 @@ const QUAD_TAGS: Array<{ key: HinaDimension; label: string; short: string; angle
   { key: 'socio-emotional', label: 'Social', short: 'Soc', angle: Math.PI / 2 },
   { key: 'coordinative', label: 'Coord.', short: 'Coord', angle: Math.PI },
 ];
-
-const InsightWorkflowChart: React.FC<{
-  points: Array<{ stageIndex: number; isNow: boolean }>;
-}> = ({ points }) => {
-  const width = 280;
-  const height = 232;
-  const padL = 46;
-  const padR = 10;
-  const padT = 14;
-  const padB = 24;
-  const innerW = width - padL - padR;
-  const innerH = height - padT - padB;
-  const last = Math.max(points.length - 1, 1);
-  const xAt = (index: number) => padL + (points.length <= 1 ? innerW / 2 : (index / last) * innerW);
-  const yAt = (stageIndex: number) => padT + (stageIndex / 6) * innerH;
-  const path = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xAt(index)} ${yAt(point.stageIndex)}`).join(' ');
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full" role="img" aria-label="Thinking workflow">
-      {JOURNEY_STAGES.map((stage, index) => {
-        const y = yAt(index);
-        return (
-          <g key={stage.id}>
-            <line x1={padL} y1={y} x2={width - padR} y2={y} stroke="#E2E8F0" strokeWidth="1" />
-            <text x={padL - 6} y={y + 3} textAnchor="end" className="fill-slate-400" fontSize="8">
-              {stage.name.slice(0, 6)}
-            </text>
-          </g>
-        );
-      })}
-      {points.length > 1 && (
-        <path d={path} fill="none" stroke="#0F172A" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
-      )}
-      {points.map((point, index) => (
-        <g key={`${point.stageIndex}-${index}`}>
-          <circle
-            cx={xAt(index)}
-            cy={yAt(point.stageIndex)}
-            r={point.isNow ? 5 : 3.2}
-            className={point.isNow ? 'fill-slate-800' : 'fill-white'}
-            stroke="#0F172A"
-            strokeWidth="1.6"
-          />
-          {point.isNow && (
-            <text x={xAt(index)} y={yAt(point.stageIndex) - 8} textAnchor="middle" className="fill-slate-800" fontSize="8" fontWeight={700}>
-              Now
-            </text>
-          )}
-        </g>
-      ))}
-      {points.length > 0 && (
-        <>
-          <text x={xAt(0)} y={height - 6} textAnchor="middle" className="fill-slate-400" fontSize="8">
-            Q1
-          </text>
-          {points.length > 1 && (
-            <text x={xAt(points.length - 1)} y={height - 6} textAnchor="middle" className="fill-slate-400" fontSize="8">
-              Q{points.length}
-            </text>
-          )}
-        </>
-      )}
-    </svg>
-  );
-};
 
 const InsightQuadChart: React.FC<{ values: number[] }> = ({ values }) => {
   const width = 280;
@@ -270,50 +188,16 @@ const InsightQuadChart: React.FC<{ values: number[] }> = ({ values }) => {
 
 const SessionInsightDeck: React.FC<{
   messages: Message[];
-  currentPhase: string;
-}> = ({ messages, currentPhase }) => {
-  const currentStage = normalizeJourneyStage(currentPhase);
-  const currentIndex = Math.max(0, JOURNEY_STAGES.findIndex((stage) => stage.id === currentStage));
+}> = ({ messages }) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [selectedIndex, setSelectedIndex] = useState(currentIndex);
   const [selectedDimension, setSelectedDimension] = useState<HinaDimension>('cognitive');
   const [lastUpdatedAt, setLastUpdatedAt] = useState(() => Date.now());
   const [clock, setClock] = useState(() => Date.now());
 
   useEffect(() => {
-    setSelectedIndex(currentIndex);
-  }, [currentIndex]);
-
-  useEffect(() => {
     const timer = window.setInterval(() => setClock(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
-
-  const userMessages = useMemo(
-    () => messages.filter((msg) => msg.role === 'user' && !msg.id.startsWith('intro-')),
-    [messages]
-  );
-
-  const stageCounts = useMemo(() => {
-    const hasTagged = userMessages.some((msg) => msg.detectedStage);
-    return JOURNEY_STAGES.map((stage) => {
-      if (hasTagged) {
-        return userMessages.filter((msg) => normalizeJourneyStage(msg.detectedStage) === stage.id).length;
-      }
-      return stage.id === currentStage ? userMessages.length : 0;
-    });
-  }, [userMessages, currentStage]);
-
-  const workflowPoints = useMemo(() => {
-    const hasTagged = userMessages.some((msg) => msg.detectedStage);
-    return userMessages.map((msg, index) => {
-      const stageId = hasTagged ? normalizeJourneyStage(msg.detectedStage) : currentStage;
-      return {
-        stageIndex: Math.max(0, JOURNEY_STAGES.findIndex((stage) => stage.id === stageId)),
-        isNow: index === userMessages.length - 1,
-      };
-    });
-  }, [userMessages, currentStage]);
 
   const hinaProfile = useMemo(
     () => buildHinaProfile(messages.filter((msg) => msg.role === 'user' || msg.role === 'assistant')),
@@ -369,7 +253,7 @@ const SessionInsightDeck: React.FC<{
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
           <span className="min-w-[2.25rem] text-center text-[10px] font-medium tabular-nums text-slate-600">
-            {pageIndex + 1}/4
+            {pageIndex + 1}/{INSIGHT_PAGES.length}
           </span>
           <button
             type="button"
@@ -392,78 +276,6 @@ const SessionInsightDeck: React.FC<{
       </div>
 
       <div className="min-h-0 flex-1">
-        {page.id === 'journey' && (
-          <div className="h-full overflow-hidden rounded-lg border border-slate-200">
-            <table className="h-full w-full border-collapse text-left">
-              <thead>
-                <tr className="bg-slate-50 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                  <th className="w-8 px-1.5 py-1 text-center">#</th>
-                  <th className="px-1.5 py-1">Stage</th>
-                  <th className="w-10 px-1.5 py-1 text-right">Qs</th>
-                </tr>
-              </thead>
-              <tbody>
-                {JOURNEY_STAGES.map((stage, index) => {
-                  const isNow = stage.id === currentStage;
-                  const isSelected = index === selectedIndex;
-                  const count = stageCounts[index];
-                  const StageIcon = stage.icon;
-                  return (
-                    <tr
-                      key={stage.id}
-                      onClick={() => setSelectedIndex(index)}
-                      className={`cursor-pointer border-t border-slate-100 transition-colors ${
-                        isNow
-                          ? 'bg-slate-800 text-white'
-                          : isSelected
-                            ? 'bg-slate-100'
-                            : 'bg-white hover:bg-slate-50'
-                      }`}
-                      aria-current={isNow ? 'step' : undefined}
-                    >
-                      <td
-                        className={`px-1.5 py-1 text-center text-[10px] font-semibold tabular-nums ${
-                          isNow ? 'text-slate-300' : 'text-slate-400'
-                        }`}
-                      >
-                        {index + 1}
-                      </td>
-                      <td className="px-1.5 py-1">
-                        <div className="flex min-w-0 items-center gap-1.5">
-                          <StageIcon className={`h-3 w-3 flex-shrink-0 ${isNow ? 'text-white' : 'text-slate-500'}`} />
-                          <span className={`truncate text-[11px] font-medium ${isNow ? 'text-white' : 'text-slate-800'}`}>
-                            {stage.name}
-                          </span>
-                          {isNow && (
-                            <span className="rounded-full bg-white/15 px-1.5 py-px text-[8px] font-semibold uppercase tracking-wide text-white">
-                              Now
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-1.5 py-1 text-right">
-                        <span className={`text-[11px] font-semibold tabular-nums ${isNow ? 'text-white' : 'text-slate-700'}`}>
-                          {count}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {page.id === 'workflow' && (
-          <div className="flex h-full items-center rounded-lg border border-slate-200 bg-slate-50/70 px-1">
-            {workflowPoints.length === 0 ? (
-              <p className="w-full text-center text-xs text-slate-500">Send a prompt to see the path.</p>
-            ) : (
-              <InsightWorkflowChart points={workflowPoints} />
-            )}
-          </div>
-        )}
-
         {page.id === 'strategy' && (
           <div className="grid h-full grid-cols-2 grid-rows-2 gap-1.5">
             {dimensionCounts.map((dimension) => {
@@ -762,14 +574,6 @@ const TUTOR_STAGE_META: Record<string, { icon: typeof Search; dot: string }> = {
   Reflect: { icon: Brain, dot: 'bg-indigo-500' },
 };
 
-const TUTOR_MODEL_META: Record<string, { label: string; icon: typeof SparklesIcon }> = {
-  'gemini-3': { label: 'Gemini 3', icon: SparklesIcon },
-  'gemini-2': { label: 'Gemini', icon: SparklesIcon },
-  claude: { label: 'Claude', icon: Brain },
-  'gpt-4': { label: 'GPT-4', icon: Zap },
-  grok: { label: 'Grok', icon: Rocket },
-};
-
 const TUTOR_ROLE_META: Record<string, { name: string; icon: typeof Layers }> = {
   analyst: { name: 'Analyst', icon: Layers },
   experimenter: { name: 'Experimenter', icon: FlaskConical },
@@ -855,10 +659,8 @@ const TutorMessageBubble: React.FC<{
   const editRef = useRef<HTMLTextAreaElement>(null);
   const isUser = message.role === 'user';
   const trailingQuestion = !isUser && !isTyping && onReplyQuestion ? extractTrailingQuestion(message.content) : null;
-  const modelMeta = message.apiUsed ? TUTOR_MODEL_META[message.apiUsed] : undefined;
   const stageMeta = message.detectedStage ? TUTOR_STAGE_META[message.detectedStage] : undefined;
   const roleMeta = message.messageRole ? TUTOR_ROLE_META[message.messageRole] : undefined;
-  const ModelIcon = modelMeta?.icon ?? SparklesIcon;
   const RoleIcon = roleMeta?.icon ?? Layers;
 
   useEffect(() => {
@@ -1000,9 +802,6 @@ const TutorMessageBubble: React.FC<{
                 <span className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
                   Writing
                 </span>
-              )}
-              {modelMeta && (
-                <TutorMetaChip icon={ModelIcon} label={modelMeta.label} />
               )}
               {message.detectedStage && (
                 <TutorMetaChip
@@ -3455,10 +3254,7 @@ Example:
 
             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 pr-5">
                 <div className="min-h-0 flex-1 overflow-hidden">
-                <SessionInsightDeck
-                  messages={messages}
-                  currentPhase={currentPhase}
-                />
+                <SessionInsightDeck messages={messages} />
                 </div>
 
                 <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm">
