@@ -33,6 +33,8 @@ interface AITutorSessionsPageProps {
   currentUser: User;
   students: User[];
   course?: Course | null;
+  /** When set, only conversations saved for this course are listed. */
+  scopeToCourse?: boolean;
 }
 
 type SortKey = 'recent' | 'messages' | 'student';
@@ -124,6 +126,7 @@ export const AITutorSessionsPage: React.FC<AITutorSessionsPageProps> = ({
   currentUser,
   students,
   course = null,
+  scopeToCourse = false,
 }) => {
   const [sessions, setSessions] = useState<AITutorStaffSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,8 +158,8 @@ export const AITutorSessionsPage: React.FC<AITutorSessionsPageProps> = ({
   const fetchStaffSessions = useCallback(async () => {
     const rows = await service.getStaffChatSessions({
       courseId: course?.id,
-      courseCode: course?.code,
-      rosterUserIds: students.map((student) => student.id),
+      courseCode: scopeToCourse ? null : course?.code,
+      rosterUserIds: scopeToCourse ? [] : students.map((student) => student.id),
     });
 
     const scoped = rows.filter((session) => {
@@ -164,11 +167,13 @@ export const AITutorSessionsPage: React.FC<AITutorSessionsPageProps> = ({
         const matchesCourse = Boolean(
           session.course_id &&
             (session.course_id === course.id ||
-              session.course_id === course.code ||
+              (!scopeToCourse && session.course_id === course.code) ||
               session.course_id.toLowerCase() === course.id.toLowerCase() ||
-              session.course_id.toLowerCase() === (course.code || '').toLowerCase())
+              (!scopeToCourse &&
+                session.course_id.toLowerCase() === (course.code || '').toLowerCase()))
         );
         if (matchesCourse) return true;
+        if (scopeToCourse) return false;
         return rosterIds.size > 0 && rosterIds.has(session.user_id) && !session.course_id;
       }
       if (rosterIds.size > 0) return rosterIds.has(session.user_id);
@@ -184,7 +189,7 @@ export const AITutorSessionsPage: React.FC<AITutorSessionsPageProps> = ({
         user_email: rosterStudent.email || session.user_email,
       };
     });
-  }, [course, rosterIds, service, students]);
+  }, [course, rosterIds, scopeToCourse, service, students]);
 
   const applySessions = useCallback((withRosterNames: AITutorStaffSession[]) => {
     setSessions(withRosterNames);

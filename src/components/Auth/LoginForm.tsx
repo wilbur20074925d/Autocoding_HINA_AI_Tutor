@@ -130,7 +130,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
                   const { secret, otpauthUrl } = TwoFactorAuthService.generateSecret(
                     signInResult.user.id,
                     signInResult.user.id,
-                    'StreamLearn',
+                    'Autocoding HINA AI Tutor',
                     signInResult.user.name || 'Account'
                   );
 
@@ -992,7 +992,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       <div className="grid h-full w-full grid-cols-1 overflow-hidden lg:grid-cols-2">
         <div className="relative hidden h-full flex-col overflow-hidden bg-gradient-to-br from-slate-100/90 to-slate-50 p-10 lg:flex">
           <div className="-mt-2 flex items-center justify-center">
-            <img src="/images/streamlearn-logo.png" alt="StreamLearn Logo" className="h-[4.8rem] w-auto" />
+            <img
+              src="/images/HINA%20AI%20Tutor.png"
+              alt="Autocoding HINA AI Tutor"
+              className="h-64 max-h-[42vh] w-auto object-contain"
+            />
           </div>
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
             <AnimatedCharacters
@@ -1008,7 +1012,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             <div className="flex w-full flex-col overflow-hidden rounded-3xl border border-white/60 bg-white/55 font-sans shadow-[0_10px_40px_-18px_rgba(15,23,42,0.45)] backdrop-blur-2xl">
               <div className="border-b border-slate-200/80 px-4 pb-3 pt-4 md:px-5">
                 <div className="mb-3 flex items-center justify-center lg:hidden">
-                  <img src="/images/streamlearn-logo.png" alt="StreamLearn" className="h-10 w-auto" />
+                  <img
+                    src="/images/HINA%20AI%20Tutor.png"
+                    alt="Autocoding HINA AI Tutor"
+                    className="h-32 w-auto object-contain"
+                  />
                 </div>
                 <h2 className="text-center text-xl font-bold tracking-tight text-black lg:text-left lg:text-2xl">
                   {mode === 'signin'

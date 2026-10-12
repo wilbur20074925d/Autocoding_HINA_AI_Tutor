@@ -1,6 +1,6 @@
 # AUTO_HINA_AITUTOR
 
-Hina Tutor is a focused frontend for the AI tutor: login, the student chat, and the teacher session review. It uses the same Supabase project as StreamLearn, so existing accounts and chat history stay in place.
+Autocoding HINA AI Tutor is a focused frontend for the AI tutor: login, the student chat, and the teacher session review. It uses the same Supabase project as StreamLearn, so existing accounts and chat history stay in place.
 
 ## Screens
 
