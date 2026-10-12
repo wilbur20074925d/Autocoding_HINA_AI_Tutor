@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Plot from 'react-plotly.js';
 import {
   Activity,
@@ -11,6 +12,8 @@ import {
   Layers,
   Lightbulb,
   Loader2,
+  Maximize2,
+  Minimize2,
   Network,
   Search,
   Users,
@@ -1314,30 +1317,161 @@ const MiniStat: React.FC<{ label: string; value: string }> = ({ label, value }) 
   </div>
 );
 
+type PlotMargin = { l: number; r: number; t: number; b: number };
+
+/** Keep labels, legends, and color bars inside the frame Plotly is given. */
+const fitClassPlot = (
+  data: Record<string, unknown>[],
+  layout: Record<string, unknown>,
+  width: number,
+  height: number
+) => {
+  const traces = data.map((trace) => {
+    const mode = typeof trace.mode === 'string' ? trace.mode : '';
+    const type = typeof trace.type === 'string' ? trace.type : '';
+    if (mode.includes('text')) return { ...trace, cliponaxis: false };
+    if (type === 'heatmap') {
+      const colorbar =
+        trace.colorbar && typeof trace.colorbar === 'object' ? (trace.colorbar as Record<string, unknown>) : {};
+      return {
+        ...trace,
+        colorbar: { thickness: 10, len: 0.68, outlinewidth: 0, xpad: 8, ...colorbar },
+      };
+    }
+    if (type === 'pie') {
+      return { ...trace, domain: { x: [0.16, 0.84], y: [0.2, 0.92] }, textposition: 'inside' };
+    }
+    return trace;
+  });
+
+  const hasHeat = traces.some((trace) => trace.type === 'heatmap');
+  const hasPie = traces.some((trace) => trace.type === 'pie');
+  const specified = (
+    layout.margin && typeof layout.margin === 'object' ? layout.margin : {}
+  ) as Partial<PlotMargin>;
+  const margin: PlotMargin = {
+    l: Math.max(48, specified.l ?? 0),
+    r: Math.max(hasHeat ? 72 : 24, specified.r ?? 0),
+    t: Math.max(28, specified.t ?? 0),
+    b: Math.max(hasPie ? 64 : 40, specified.b ?? 0),
+  };
+
+  let legend =
+    layout.legend && typeof layout.legend === 'object'
+      ? { ...(layout.legend as Record<string, unknown>) }
+      : undefined;
+  if (legend && legend.orientation === 'h') {
+    const y = typeof legend.y === 'number' ? legend.y : 1;
+    if (y >= 0.98) {
+      legend = { ...legend, y: 1.02, yanchor: 'bottom', x: 0, xanchor: 'left' };
+      margin.t = Math.max(margin.t, 56);
+    } else if (y <= 0.05) {
+      legend = { ...legend, y: 0, yanchor: 'top', x: 0.5, xanchor: 'center' };
+      margin.b = Math.max(margin.b, 72);
+    }
+  }
+
+  const fitAxis = (axis: unknown) => {
+    if (!axis || typeof axis !== 'object') return undefined;
+    const row = { ...(axis as Record<string, unknown>), automargin: true };
+    if (Array.isArray(row.range) && row.range[0] === 0 && row.range[1] === 1) {
+      row.range = [-0.08, 1.18];
+    }
+    return row;
+  };
+
+  const polar =
+    layout.polar && typeof layout.polar === 'object'
+      ? {
+          ...(layout.polar as Record<string, unknown>),
+          domain: { x: [0.14, 0.86], y: [0.2, 0.8] },
+        }
+      : undefined;
+  if (polar) margin.t = Math.max(margin.t, 48);
+
+  const xaxis = fitAxis(layout.xaxis);
+  const yaxis = fitAxis(layout.yaxis);
+
+  return {
+    data: traces,
+    layout: {
+      ...layout,
+      autosize: false,
+      width,
+      height,
+      margin,
+      ...(legend ? { legend } : {}),
+      ...(xaxis ? { xaxis } : {}),
+      ...(yaxis ? { yaxis } : {}),
+      ...(polar ? { polar } : {}),
+    },
+  };
+};
+
+const ClassPlotCanvas: React.FC<{
+  slide: HinaPlotSlide;
+  onPlotClick?: (event: { points?: Array<{ customdata?: unknown }> }) => void;
+  /** In the side-by-side pane, keep a readable chart and scroll the frame. Full view uses the pane height. */
+  scrollable?: boolean;
+}> = ({ slide, onPlotClick, scrollable = false }) => {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: 0, h: 0 });
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const update = () => {
+      const viewW = Math.max(0, Math.floor(frame.clientWidth) - 8);
+      const viewH = Math.max(0, Math.floor(frame.clientHeight) - 8);
+      const next = {
+        w: viewW,
+        h: scrollable ? Math.max(viewH, 460) : viewH,
+      };
+      setSize((prev) => (prev.w === next.w && prev.h === next.h ? prev : next));
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [scrollable]);
+
+  const fitted = size.w > 48 && size.h > 48 ? fitClassPlot(slide.data, slide.layout, size.w, size.h) : null;
+
+  return (
+    <div ref={frameRef} className="h-full min-h-0 w-full overflow-auto">
+      {fitted && (
+        <Plot
+          data={fitted.data as any}
+          layout={fitted.layout as any}
+          config={plotConfig}
+          style={{ width: size.w, height: size.h }}
+          useResizeHandler={false}
+          onClick={onPlotClick as any}
+        />
+      )}
+    </div>
+  );
+};
+
 const PlotPager: React.FC<{
   slides: HinaPlotSlide[];
   onPlotClick?: (event: { points?: Array<{ customdata?: unknown }> }) => void;
 }> = ({ slides, onPlotClick }) => {
   const [index, setIndex] = useState(0);
-  const [plotH, setPlotH] = useState(320);
-  const plotBoxRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
   const safeIndex = slides.length ? ((index % slides.length) + slides.length) % slides.length : 0;
   const slide = slides[safeIndex];
-
-  useEffect(() => {
-    const box = plotBoxRef.current;
-    if (!box) return;
-    const update = () => setPlotH(Math.max(220, Math.floor(box.clientHeight)));
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(box);
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName)) return;
+      if (event.key === 'Escape' && expanded) {
+        event.preventDefault();
+        event.stopPropagation();
+        setExpanded(false);
+        return;
+      }
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
         setIndex((current) => current - 1);
@@ -1347,50 +1481,60 @@ const PlotPager: React.FC<{
         setIndex((current) => current + 1);
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [expanded]);
 
   if (!slide) return null;
 
-  return (
+  const pager = (full: boolean) => (
     <div className="flex h-full min-h-0 flex-col gap-2">
-      <div className="min-w-0 shrink-0 px-1">
-        <p className="truncate text-sm font-semibold tracking-tight text-slate-900">
-          {slide.title}
-          <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-            {safeIndex + 1} / {slides.length}
-          </span>
-        </p>
-        <p className="truncate text-[11px] font-medium tracking-tight text-slate-500">{slide.caption}</p>
+      <div className="flex shrink-0 items-start gap-2 px-1">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold tracking-tight text-slate-900">
+            {slide.title}
+            <span className="ml-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              {safeIndex + 1} / {slides.length}
+            </span>
+          </p>
+          <p className={`${full ? 'line-clamp-2' : 'truncate'} text-[11px] font-medium tracking-tight text-slate-500`}>
+            {slide.caption}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setIndex((current) => current - 1)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:border-slate-600 hover:bg-slate-700 hover:text-white"
+            aria-label="Previous plot"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIndex((current) => current + 1)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-colors hover:border-slate-600 hover:bg-slate-700 hover:text-white"
+            aria-label="Next plot"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setExpanded((current) => !current)}
+            className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 text-[11px] font-semibold tracking-tight text-slate-700 transition-colors hover:border-slate-600 hover:bg-slate-700 hover:text-white"
+            aria-label={full ? 'Leave full view' : 'View the figure in full'}
+          >
+            {full ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            {full ? 'Close' : 'Full view'}
+          </button>
+        </div>
       </div>
-      <div
-        ref={plotBoxRef}
-        className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/50"
-      >
-        <button
-          type="button"
-          onClick={() => setIndex((current) => current - 1)}
-          className="absolute left-2 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl border border-slate-200 bg-white/95 text-slate-700 shadow-sm transition-colors hover:border-slate-600 hover:bg-slate-700 hover:text-white"
-          aria-label="Previous plot"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setIndex((current) => current + 1)}
-          className="absolute right-2 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl border border-slate-200 bg-white/95 text-slate-700 shadow-sm transition-colors hover:border-slate-600 hover:bg-slate-700 hover:text-white"
-          aria-label="Next plot"
-        >
-          <ArrowRight className="h-4 w-4" />
-        </button>
-        <Plot
-          data={slide.data as any}
-          layout={{ ...(slide.layout as object), autosize: true, height: plotH } as any}
-          config={plotConfig}
-          style={{ width: '100%', height: plotH }}
-          useResizeHandler
-          onClick={onPlotClick as any}
+      <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/50">
+        <ClassPlotCanvas
+          key={`${slide.title}-${full ? 'full' : 'pane'}`}
+          slide={slide}
+          onPlotClick={onPlotClick}
+          scrollable={!full}
         />
       </div>
       <div className="flex shrink-0 flex-nowrap items-center justify-center gap-1 overflow-x-auto px-1">
@@ -1415,5 +1559,29 @@ const PlotPager: React.FC<{
         })}
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {pager(false)}
+      {expanded &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/55 p-3 backdrop-blur-[2px]"
+            onClick={() => setExpanded(false)}
+          >
+            <div
+              className="flex h-[94vh] w-[96vw] max-w-[1500px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${slide.title} full view`}
+            >
+              {pager(true)}
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
   );
 };

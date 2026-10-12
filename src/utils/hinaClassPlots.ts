@@ -143,8 +143,8 @@ const springLayout = (
     for (const id of nodeIds) {
       const p = pos.get(id)!;
       const d = disp.get(id)!;
-      p.x = Math.min(0.96, Math.max(0.04, p.x + d.x * cool));
-      p.y = Math.min(0.96, Math.max(0.04, p.y + d.y * cool));
+      p.x = Math.min(0.82, Math.max(0.18, p.x + d.x * cool));
+      p.y = Math.min(0.82, Math.max(0.18, p.y + d.y * cool));
     }
   }
   return pos;
@@ -214,7 +214,7 @@ const networkBipartite = (edges: HinaClassEdge[], students: HinaClassStudentRow[
         showlegend: false,
       },
     ],
-    layout: { ...baseLayout, height: PLOT_H, ...hideAxes(0.04), hovermode: 'closest', margin: { l: 24, r: 150, t: 10, b: 10 }, showlegend: false },
+    layout: { ...baseLayout, height: PLOT_H, ...hideAxes(0.14), hovermode: 'closest', margin: { l: 28, r: 156, t: 28, b: 28 }, showlegend: false },
   };
 };
 
@@ -272,7 +272,7 @@ const networkSpring = (edges: HinaClassEdge[], students: HinaClassStudentRow[], 
         showlegend: false,
       },
     ],
-    layout: { ...baseLayout, height: PLOT_H, ...hideAxes(0.06), hovermode: 'closest', margin: { l: 12, r: 12, t: 12, b: 12 }, showlegend: false },
+    layout: { ...baseLayout, height: PLOT_H, ...hideAxes(0.2), hovermode: 'closest', margin: { l: 36, r: 36, t: 36, b: 36 }, showlegend: false },
   };
 };
 
@@ -351,10 +351,10 @@ const rosterDimensions = (students: HinaClassStudentRow[]): HinaPlotSlide => ({
     ...baseLayout,
     height: PLOT_H,
     barmode: 'stack',
-    margin: { l: 48, r: 16, t: 12, b: students.length > 10 ? 90 : 56 },
-    xaxis: { tickangle: students.length > 8 ? -35 : 0, linecolor: BW_AXIS },
-    yaxis: { title: { text: 'Coded turns', font: { size: 12, color: BW_MUTED } }, gridcolor: BW_GRID, rangemode: 'tozero' },
-    legend: { orientation: 'h', y: 1.08, font: { size: 11 } },
+    margin: { l: 56, r: 24, t: 64, b: students.length > 10 ? 96 : 64 },
+    xaxis: { tickangle: students.length > 8 ? -35 : 0, automargin: true, linecolor: BW_AXIS },
+    yaxis: { title: { text: 'Coded turns', font: { size: 12, color: BW_MUTED } }, gridcolor: BW_GRID, rangemode: 'tozero', automargin: true },
+    legend: { orientation: 'h', y: 1.02, yanchor: 'bottom', x: 0, xanchor: 'left', font: { size: 11 } },
     showlegend: true,
   },
 });
@@ -604,7 +604,8 @@ const clusterScatter = (analysis: HinaClassAnalysis): HinaPlotSlide => ({
     ...baseLayout,
     height: PLOT_H,
     showlegend: true,
-    legend: { orientation: 'h', y: 1.08, font: { size: 11 } },
+    legend: { orientation: 'h', y: 1.02, yanchor: 'bottom', x: 0, xanchor: 'left', font: { size: 11 } },
+    margin: { l: 56, r: 28, t: 64, b: 52 },
     xaxis: { title: { text: 'Quantity', font: { size: 12, color: BW_MUTED } }, gridcolor: BW_GRID, rangemode: 'tozero' },
     yaxis: { title: { text: 'Diversity', font: { size: 12, color: BW_MUTED } }, gridcolor: BW_GRID, range: [0, 1] },
   },
@@ -655,9 +656,14 @@ const clusterRadar = (analysis: HinaClassAnalysis): HinaPlotSlide => {
     layout: {
       ...baseLayout,
       height: PLOT_H,
-      polar: { radialaxis: { gridcolor: BW_GRID, linecolor: BW_AXIS }, angularaxis: { linecolor: BW_AXIS } },
+      polar: {
+        domain: { x: [0.14, 0.86], y: [0.18, 0.82] },
+        radialaxis: { gridcolor: BW_GRID, linecolor: BW_AXIS },
+        angularaxis: { linecolor: BW_AXIS },
+      },
       showlegend: true,
-      legend: { orientation: 'h', y: 1.08, font: { size: 11 } },
+      margin: { l: 48, r: 48, t: 64, b: 36 },
+      legend: { orientation: 'h', y: 1.02, yanchor: 'bottom', x: 0, xanchor: 'left', font: { size: 11 } },
     },
   };
 };
@@ -749,7 +755,7 @@ const projectionSpring = (analysis: HinaClassAnalysis): HinaPlotSlide => {
         showlegend: false,
       },
     ],
-    layout: { ...baseLayout, height: PLOT_H, ...hideAxes(0.08), hovermode: 'closest', margin: { l: 16, r: 16, t: 16, b: 16 }, showlegend: false },
+    layout: { ...baseLayout, height: PLOT_H, ...hideAxes(0.2), hovermode: 'closest', margin: { l: 40, r: 40, t: 40, b: 40 }, showlegend: false },
   };
 };
 
@@ -896,7 +902,13 @@ const overlayExecute = (analysis: HinaClassAnalysis): HinaPlotSlide => {
         hovertemplate: '%{label}: %{value}<extra></extra>',
       },
     ],
-    layout: { ...baseLayout, height: PLOT_H, showlegend: true, legend: { orientation: 'h', y: -0.08 } },
+    layout: {
+      ...baseLayout,
+      height: PLOT_H,
+      showlegend: true,
+      margin: { l: 24, r: 24, t: 24, b: 72 },
+      legend: { orientation: 'h', y: 0, yanchor: 'top', x: 0.5, xanchor: 'center' },
+    },
   };
 };
 
