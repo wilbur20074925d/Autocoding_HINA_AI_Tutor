@@ -1,0 +1,418 @@
+/* Extension side panel — complements @hina/index.css (Tailwind + Inter) */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.ext-shell {
+  @apply mx-auto flex max-w-lg flex-col gap-2.5 px-3 py-3;
+}
+
+.ext-shell-main {
+  @apply h-full min-h-0 max-h-screen pb-3;
+}
+
+.ext-app-header {
+  @apply flex flex-col gap-2.5 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/90 px-3 py-2.5 shadow-sm;
+}
+
+.ext-app-header-brand {
+  @apply flex items-center gap-2.5;
+}
+
+.ext-app-header-logo {
+  @apply h-10 w-10 shrink-0 rounded-xl object-cover shadow-sm ring-1 ring-slate-200;
+}
+
+.ext-app-header-titles {
+  @apply min-w-0 flex-1;
+}
+
+.ext-app-header-name {
+  @apply text-[15px] font-semibold leading-tight tracking-tight text-slate-900;
+  /* Full product name — do not truncate */
+}
+
+.ext-app-header-user {
+  @apply mt-0.5 break-words text-[11px] font-medium leading-snug text-slate-500;
+}
+
+.ext-app-header-actions {
+  @apply grid grid-cols-2 gap-1.5;
+}
+
+.ext-app-header-btn {
+  @apply relative inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-2 py-2 text-[11px] font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50;
+}
+
+.ext-app-header-btn-setup {
+  @apply col-span-1;
+}
+
+.ext-app-header-btn-active {
+  @apply border-slate-800 bg-slate-800 text-white shadow-md hover:border-slate-700 hover:bg-slate-700;
+}
+
+.ext-app-header-btn-active .ext-app-header-btn-label {
+  @apply text-white;
+}
+
+.ext-app-header-btn-label {
+  @apply truncate;
+}
+
+.ext-app-header-attention {
+  @apply absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500 ring-2 ring-white;
+}
+
+.ext-chat-panel-fill {
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden;
+}
+
+.ext-chat-panel-empty {
+  @apply flex min-h-0 flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white/80 px-6 py-10 text-center shadow-sm;
+}
+
+.ext-signin-shell {
+  @apply py-6;
+}
+
+.ext-signin-card {
+  animation: ext-signin-enter 0.45s ease-out both;
+}
+
+.ext-signin-hero-img {
+  animation: ext-signin-float 4s ease-in-out infinite;
+}
+
+.ext-signin-error {
+  animation: ext-signin-shake 0.4s ease-out;
+}
+
+.ext-signin-field {
+  @apply flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 shadow-sm transition-shadow focus-within:border-slate-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-slate-800/10;
+}
+
+.ext-signin-field-icon {
+  @apply h-4 w-4 shrink-0 text-slate-400;
+}
+
+.ext-signin-field-input {
+  @apply min-h-0 min-w-0 flex-1 border-0 bg-transparent py-2.5 text-[13px] font-medium leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0 disabled:opacity-55;
+}
+
+.ext-signin-field-toggle {
+  @apply -mr-0.5 shrink-0 rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800;
+}
+
+@keyframes ext-signin-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ext-signin-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes ext-signin-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.ext-select {
+  @apply w-full rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-[13px] font-medium text-slate-800 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-800/10 disabled:opacity-50;
+}
+
+.ext-setup-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ext-setup-icon-chip {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ext-setup-modal-backdrop {
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(4px);
+}
+
+.ext-setup-tiny-page {
+  animation: ext-setup-modal-enter 0.28s ease-out both;
+}
+
+@keyframes ext-setup-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ext-setup-chip-row {
+  @apply flex justify-center gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+
+.ext-setup-session-card {
+  @apply w-full rounded-xl border border-slate-200 bg-white p-3 text-left text-slate-900 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm;
+}
+
+.ext-setup-session-card.selected,
+.ext-setup-session-card.selected:hover,
+.ext-setup-session-card.selected:focus-visible {
+  @apply border-slate-800 bg-slate-800 text-white shadow-md ring-1 ring-slate-800/20 hover:border-slate-700 hover:bg-slate-700;
+}
+
+.ext-setup-session-card.selected .ext-setup-session-title,
+.ext-setup-session-card.selected:hover .ext-setup-session-title,
+.ext-setup-session-card.selected:focus-visible .ext-setup-session-title {
+  @apply text-white;
+}
+
+.ext-setup-session-card.selected .ext-setup-session-meta,
+.ext-setup-session-card.selected:hover .ext-setup-session-meta,
+.ext-setup-session-card.selected:focus-visible .ext-setup-session-meta {
+  @apply text-slate-200;
+}
+
+.ext-setup-session-card.selected .ext-setup-session-preview,
+.ext-setup-session-card.selected:hover .ext-setup-session-preview,
+.ext-setup-session-card.selected:focus-visible .ext-setup-session-preview {
+  @apply text-slate-200;
+}
+
+.ext-setup-session-card.selected .ext-setup-session-code,
+.ext-setup-session-card.selected:hover .ext-setup-session-code,
+.ext-setup-session-card.selected:focus-visible .ext-setup-session-code {
+  @apply border-white/20 bg-white/10 text-white;
+}
+
+.ext-setup-session-title {
+  @apply min-w-0 truncate text-sm font-semibold tracking-tight text-slate-900;
+}
+
+.ext-setup-session-meta {
+  @apply text-[11px] font-medium text-slate-500;
+}
+
+.ext-setup-session-code {
+  @apply inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wide text-slate-700;
+}
+
+.ext-setup-session-badge {
+  @apply shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white;
+}
+
+.ext-setup-session-card.selected .ext-setup-session-badge,
+.ext-setup-session-card.selected:hover .ext-setup-session-badge {
+  @apply bg-white/20 text-white;
+}
+
+.ext-setup-list-panel {
+  @apply overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm;
+}
+
+.ext-setup-list-panel-header {
+  @apply flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/90 px-3 py-2.5;
+}
+
+.ext-setup-chat-rail {
+  @apply m-0 flex list-none gap-2.5 overflow-x-auto overflow-y-hidden px-3 pb-3 pt-1 snap-x snap-mandatory scroll-smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.ext-setup-chat-rail::-webkit-scrollbar {
+  height: 4px;
+}
+
+.ext-setup-chat-rail::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-slate-300;
+}
+
+.ext-setup-chat-rail-item {
+  @apply shrink-0 snap-start;
+}
+
+.ext-setup-chat-card {
+  @apply flex h-full min-h-[8.75rem] w-[11.25rem] flex-col text-left;
+}
+
+.ext-chat-insights-fab {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ext-chat-composer-main {
+  @apply min-w-0 w-full rounded-xl border border-slate-200 bg-slate-50/80 shadow-sm transition-shadow focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-800/10;
+}
+
+.ext-chat-composer-input {
+  @apply block w-full resize-none border-0 bg-transparent px-3 py-2 text-[13px] font-medium leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0 disabled:opacity-55;
+}
+
+.ext-chat-composer-actions {
+  @apply flex flex-wrap items-center justify-end gap-1.5 border-t border-slate-200/80 px-2 py-1.5;
+}
+
+.ext-chat-composer-help {
+  @apply inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-45;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ext-help-step-num {
+  @apply flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[9px] font-bold text-white;
+}
+
+.ext-chat-composer-secondary {
+  @apply inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-600 transition-colors hover:bg-white hover:text-slate-900 disabled:opacity-45;
+}
+
+.ext-chat-composer-send {
+  @apply inline-flex items-center gap-1 rounded-lg bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-45;
+}
+
+.ext-shell-relative {
+  @apply relative min-h-0 flex-1;
+}
+
+.ext-textarea {
+  @apply w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] font-medium leading-relaxed text-slate-800 shadow-sm transition-shadow placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-800/10 disabled:opacity-55;
+}
+
+.ext-kbd {
+  @apply inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold tracking-tight text-slate-600 shadow-sm;
+}
+
+.ext-reply {
+  @apply max-h-52 overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50/80 p-3 shadow-sm;
+}
+
+.ext-notice {
+  @apply rounded-xl border px-3 py-2 text-xs font-medium tracking-tight;
+}
+
+.ext-notice.success {
+  @apply border-emerald-200 bg-emerald-50 text-emerald-800;
+}
+
+.ext-notice.error {
+  @apply border-red-200 bg-red-50 text-red-800;
+}
+
+.ext-notice.info {
+  @apply border-slate-200 bg-white text-slate-600;
+}
+
+.ext-list {
+  @apply m-0 flex max-h-44 list-none flex-col gap-1.5 overflow-auto p-0;
+}
+
+.ext-list button {
+  @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-sm font-semibold tracking-tight text-slate-800 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50;
+}
+
+.ext-list button.selected {
+  @apply border-slate-800 bg-slate-800 text-white shadow-sm hover:bg-slate-700 hover:border-slate-700;
+}
+
+.ext-list button.selected .ext-list-meta {
+  @apply text-slate-300;
+}
+
+.ext-list-meta {
+  @apply font-medium text-slate-500;
+}
+
+.ext-spinner {
+  @apply inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-slate-800;
+}
+
+/* Side panel tutor reply — match web chat typography & contain overflow */
+.ext-chat-markdown,
+.ext-chat-markdown.markdown-content {
+  @apply min-w-0 max-w-full overflow-x-hidden text-[13px] leading-[1.55] tracking-tight text-slate-700;
+}
+
+.ext-chat-markdown .markdown-content,
+.ext-chat-markdown.markdown-content {
+  @apply text-[13px] leading-[1.55] tracking-tight text-slate-700;
+}
+
+.ext-chat-markdown .markdown-content p,
+.ext-chat-markdown.markdown-content p {
+  @apply mb-2 last:mb-0;
+}
+
+.ext-chat-markdown .markdown-content ul,
+.ext-chat-markdown .markdown-content ol,
+.ext-chat-markdown.markdown-content ul,
+.ext-chat-markdown.markdown-content ol {
+  @apply mb-2.5 list-outside space-y-1.5 pl-5;
+}
+
+.ext-chat-markdown .markdown-content li,
+.ext-chat-markdown.markdown-content li {
+  @apply leading-relaxed;
+}
+
+.ext-chat-markdown .markdown-content h1,
+.ext-chat-markdown.markdown-content h1 {
+  @apply text-[15px] font-semibold text-slate-900;
+}
+
+.ext-chat-markdown .markdown-content h2,
+.ext-chat-markdown.markdown-content h2 {
+  @apply text-[14px] font-semibold text-slate-900;
+}
+
+.ext-chat-markdown .markdown-content h3,
+.ext-chat-markdown.markdown-content h3 {
+  @apply text-[13px] font-semibold text-slate-900;
+}
+
+.ext-chat-markdown .markdown-content code,
+.ext-chat-markdown.markdown-content code {
+  @apply text-[12px];
+}
+
+.ext-chat-markdown pre,
+.ext-chat-markdown .markdown-content pre,
+.ext-chat-markdown.markdown-content pre {
+  @apply max-w-full overflow-x-auto;
+}
+
+.ext-tutor-bubble-body {
+  @apply min-w-0 max-w-full overflow-x-hidden overflow-y-visible break-words;
+}

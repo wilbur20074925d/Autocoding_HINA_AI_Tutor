@@ -1,0 +1,4 @@
+# Supabase local/dev config (Edge Functions)
+
+[functions.hina-label-messages]
+verify_jwt = true

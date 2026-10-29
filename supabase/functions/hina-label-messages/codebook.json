@@ -1,0 +1,154 @@
+[
+  {
+    "i": 1,
+    "id": "direct-solution-request",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Direct Solution Request",
+    "definition": "Directly asking for the final solution to a learning task."
+  },
+  {
+    "i": 2,
+    "id": "extend-refine-request",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Extend / Refine Request",
+    "definition": "Requesting to extend, modify, or refine existing content."
+  },
+  {
+    "i": 3,
+    "id": "information-idea-question",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Information / Idea Question",
+    "definition": "Inquiring about relevant information or ideas related to problem-solving."
+  },
+  {
+    "i": 4,
+    "id": "direct-solution-provide",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Direct Solution Provide",
+    "definition": "Directly providing the final solution to a learning task."
+  },
+  {
+    "i": 5,
+    "id": "idea-explanation-sharing",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Idea / Explanation Sharing",
+    "definition": "Providing factual information, clarification, or explanation in response to a question."
+  },
+  {
+    "i": 6,
+    "id": "build-on-question",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Build on Question",
+    "definition": "Following up on someone else's reply or idea."
+  },
+  {
+    "i": 7,
+    "id": "critical-assessment",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Critical Assessment",
+    "definition": "Assessing or challenging an idea."
+  },
+  {
+    "i": 8,
+    "id": "integration-synthesis",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Integration / Synthesis",
+    "definition": "Connecting multiple ideas or pieces of information."
+  },
+  {
+    "i": 9,
+    "id": "extend-refine-solution",
+    "dimensionId": "cognitive",
+    "dimension": "Cognitive",
+    "code": "Extend / Refine Solution",
+    "definition": "Modifying or adjusting an existing solution to enhance its precision, feasibility, or effectiveness."
+  },
+  {
+    "i": 10,
+    "id": "planning",
+    "dimensionId": "metacognitive",
+    "dimension": "Metacognitive",
+    "code": "Planning",
+    "definition": "Discussing goals, strategies, or a roadmap for completing the task."
+  },
+  {
+    "i": 11,
+    "id": "monitoring",
+    "dimensionId": "metacognitive",
+    "dimension": "Metacognitive",
+    "code": "Monitoring",
+    "definition": "Checking progress, identifying confusion, or recognizing a problem."
+  },
+  {
+    "i": 12,
+    "id": "evaluation",
+    "dimensionId": "metacognitive",
+    "dimension": "Metacognitive",
+    "code": "Evaluation",
+    "definition": "Looking back on what was learned or evaluating the group's process."
+  },
+  {
+    "i": 13,
+    "id": "encouragement-greetings",
+    "dimensionId": "socio-emotional",
+    "dimension": "Socio-emotional",
+    "code": "Encouragement / Greetings",
+    "definition": "Providing greetings, positive feedback, approval, or motivation to peers."
+  },
+  {
+    "i": 14,
+    "id": "appreciation",
+    "dimensionId": "socio-emotional",
+    "dimension": "Socio-emotional",
+    "code": "Appreciation",
+    "definition": "Expressing gratitude for help or contributions."
+  },
+  {
+    "i": 15,
+    "id": "empathy",
+    "dimensionId": "socio-emotional",
+    "dimension": "Socio-emotional",
+    "code": "Empathy",
+    "definition": "Acknowledging or sharing the feelings of others."
+  },
+  {
+    "i": 16,
+    "id": "agreement-alignment",
+    "dimensionId": "socio-emotional",
+    "dimension": "Socio-emotional",
+    "code": "Agreement / Alignment",
+    "definition": "Brief, affirmative responses that signal consensus, validation, or confirmation of others' comments."
+  },
+  {
+    "i": 17,
+    "id": "task-clarification",
+    "dimensionId": "coordinative",
+    "dimension": "Coordinative",
+    "code": "Task Clarification",
+    "definition": "Understanding instructions, scope, and formal constraints."
+  },
+  {
+    "i": 18,
+    "id": "task-coordination",
+    "dimensionId": "coordinative",
+    "dimension": "Coordinative",
+    "code": "Task Coordination",
+    "definition": "Delegating or accepting specific responsibilities."
+  },
+  {
+    "i": 19,
+    "id": "resource-coordination",
+    "dimensionId": "coordinative",
+    "dimension": "Coordinative",
+    "code": "Resource Coordination",
+    "definition": "Discussing the use of tools, documents, or materials."
+  }
+]

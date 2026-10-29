@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "HINA AI Tutor",
+  "version": "0.3.5",
+  "description": "Ask the HINA AI tutor from clipboard or a screenshot region; step-by-step help on a floating panel, synced to your class chat.",
+  "permissions": ["storage", "sidePanel", "tabs", "alarms", "clipboardRead", "scripting", "activeTab"],
+  "host_permissions": ["<all_urls>", "https://zenmux.ai/*", "https://*.supabase.co/*"],
+  "commands": {
+    "ask-from-clipboard": {
+      "suggested_key": {
+        "default": "Ctrl+W",
+        "mac": "Command+W"
+      },
+      "description": "Ask HINA tutor from clipboard text (any website tab)"
+    },
+    "capture-question-region": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+W",
+        "mac": "Command+Shift+W"
+      },
+      "description": "Capture a screen region and ask HINA tutor (any website tab)"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open HINA Tutor",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "file://*/*", "ftp://*/*"],
+      "js": ["src/content/pageAssist/index.ts"],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "http://localhost:5174/*",
+        "http://127.0.0.1:5174/*",
+        "http://localhost:4173/*",
+        "http://127.0.0.1:4173/*"
+      ],
+      "js": ["src/content/localhost/index.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["hina-icon.png", "hina-ai-tutor-hero.png", "icons/*.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
